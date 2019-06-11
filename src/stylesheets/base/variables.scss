@@ -1,0 +1,43 @@
+// Standard Colors
+$color-light: #f7f8f9;
+$color-primary: #2e91fc;
+$color-border: #e5e9ed;
+
+// Text Colors
+$text-light: #748493;
+$text-default: #556370;
+$text-dark: #373f47;
+
+// Typography
+$font-family-default: "Raleway", sans-serif;
+$font-size-default: 1.8rem;
+$font-size-input: 1.8rem;
+
+// Breakpoints
+$xs-max: 479px;
+$sm-min: $xs-max + 1;
+$sm-max: 767px;
+$md-min: $sm-max + 1;
+$md-max: 1023px;
+$lg-min: $md-max + 1;
+$lg-max: 1239px;
+$xl-min: $lg-max + 1;
+
+// Elements
+$border-default: 1px solid $color-border;
+$border-radius-default: 5px;
+$box-shadow-default: 0 4px 18px 2px rgba(0,0,0,0.3);
+
+// Grid
+$grid-column-count: 12;
+$grid-baseline: 16px;
+
+// Gutters
+$gutter: 30px;
+$container-gutter-mobile: $gutter;
+$container-gutter-tablet: 50px;
+$container-gutter-desktop: 70px;
+
+// Page
+$page-width: 1290px;
+$page-limit: $page-width + ($container-gutter-desktop * 2);

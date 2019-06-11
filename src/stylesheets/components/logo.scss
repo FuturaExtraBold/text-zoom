@@ -1,0 +1,9 @@
+.logo {
+  position: relative;
+  width: 1600px;
+  margin: 0 auto;
+  &__svg {
+    @include responsive-image;
+    padding: 0 60px;
+  }
+}

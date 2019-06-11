@@ -1,3 +1,39 @@
+@mixin appearance-none {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+@mixin clearfix {
+  display: table;
+  clear: both;
+  content: " ";
+}
+
+@mixin container() {
+  max-width: $page-width + $container-gutter-mobile * 1;
+  margin: 0 auto;
+  padding-right: $container-gutter-mobile;
+  padding-left: $container-gutter-mobile;
+  @media (min-width: $sm-min) {
+    max-width: $page-width + $container-gutter-mobile * 2;
+  }
+  @media (min-width: $md-min) {
+    max-width: $page-width + $container-gutter-tablet * 2;
+    padding-right: $container-gutter-tablet;
+    padding-left: $container-gutter-tablet;
+  }
+  @media (min-width: $lg-min) {
+    max-width: $page-width + $container-gutter-desktop * 2;
+    padding-right: $container-gutter-desktop;
+    padding-left: $container-gutter-desktop;
+  }
+  &:before,
+  &:after {
+    @include clearfix;
+  }
+}
+
 @mixin fit {
   position: absolute;
   top: 0;
@@ -10,4 +46,8 @@
   display: block;
   max-width: 100%;
   height: auto;
+}
+
+@mixin webkit-overflow-scrolling {
+  -webkit-overflow-scrolling: touch;
 }
