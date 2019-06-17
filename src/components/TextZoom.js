@@ -1,57 +1,67 @@
 import React, { Component } from "react";
 import $ from "jquery";
-import TweenMax from "gsap/TweenMax";
-
-import { ReactComponent as Logo } from "../images/kajabi_logo.svg";
-import { POINT_CONVERSION_COMPRESSED } from "constants";
+import * as PIXI from "pixi.js";
+import TweenMax from "gsap";
+import PixiPlugin from "gsap/PixiPlugin";
 
 class TextZoom extends Component {
 
   componentDidMount() {
-
     console.log("TextZoom componentDidMount");
 
-    var canvas = document.getElementById("my-canvas");
+    let $window = $(window);
 
-    // Get the device pixel ratio, falling back to 1.
-    var dpr = window.devicePixelRatio || 1;
-    console.log("dpr:", dpr);
+    const app = new PIXI.Application({
+      width: $window.outerWidth(),
+      height: $window.outerHeight(),
+      backgroundColor: 0xffffff,
+      resolution: window.devicePixelRatio || 1
+    });
+    document.querySelector(".zoom__positioner").appendChild(app.view);
 
-    // Get the size of the canvas in CSS pixels.
-    var rect = canvas.getBoundingClientRect();
-    console.log("rect:", rect);
+    app.stage.interactive = true;
 
-    // Give the canvas pixel dimensions of their CSS size * the device pixel ratio.
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
+    const bg = PIXI.Sprite.from(require("../images/bg.jpg"));
+    app.stage.addChild(bg);
 
-    var ctx = canvas.getContext("2d");
+    var beeSvg = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/106114/bee.svg";
+    // var beeSvg = require(`../images/new_kajabi_logo.svg`);
 
-    // Scale all drawing operations by the dpr, so you don't have to worry about the difference.
-    ctx.scale(dpr, dpr);
+    const beeTexture = PIXI.Texture.from(beeSvg, undefined, undefined, 1.0);
+    const mask = new PIXI.Sprite(beeTexture);
+    mask.anchor.set(0.5);
+    mask.x = 310;
+    mask.y = 190;
 
-    // ctx.lineWidth = 5;
-    // ctx.beginPath();
-    // ctx.moveTo(100, 100);
-    // ctx.lineTo(200, 200);
-    // ctx.stroke();
+    bg.mask = mask;
 
-    ctx.fillStyle = "rgba(255, 255, 255, 1)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = "160px Proxima Nova";
-    ctx.fillStyle = "rgba(0, 0, 0, 1)";
-    ctx.globalCompositeOperation = "destination-out";
-    // ctx.fillText(heading.innerText, canvas.width / 4, canvas.height / 2);
-    ctx.fillText("Hello World!", 10, 50);
+    app.stage.addChild(mask);
 
+    const target = new PIXI.Point();
+
+    reset();
+
+    function reset() {
+      target.x = Math.floor(Math.random() * 550);
+      target.y = Math.floor(Math.random() * 300);
+    }
+
+    // app.ticker.add(() => {
+    //   mask.x += (target.x - mask.x) * 0.1;
+    //   mask.y += (target.y - mask.y) * 0.1;
+    //   mask.rotation += 0.2;
+
+    //   if (Math.abs(mask.x - target.x) < 1) {
+    //     reset();
+    //   }
+    // });
   }
 
   render() {
-    const bgImgUrl = require(`../images/bg.jpg`);
     return (
-      <section className="text-zoom">
-        <div className="text-zoom__bg"></div>
-        <canvas id="my-canvas"></canvas>
+      <section className="zoom">
+        <div className="zoom__positioner">
+        </div>
       </section>
     );
   }
