@@ -3,6 +3,7 @@ import $ from "jquery";
 import * as PIXI from "pixi.js";
 import TweenMax from "gsap";
 import PixiPlugin from "gsap/PixiPlugin";
+import { maxHeaderSize } from "http";
 
 class TextZoom extends Component {
 
@@ -24,14 +25,13 @@ class TextZoom extends Component {
     const bg = PIXI.Sprite.from(require("../images/bg.jpg"));
     app.stage.addChild(bg);
 
-    var beeSvg = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/106114/bee.svg";
-    // var beeSvg = require(`../images/new_kajabi_logo.svg`);
+    // var beeSvg = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/106114/bee.svg";
 
-    const beeTexture = PIXI.Texture.from(beeSvg, undefined, undefined, 1.0);
-    const mask = new PIXI.Sprite(beeTexture);
-    mask.anchor.set(0.5);
-    mask.x = 310;
-    mask.y = 190;
+    const kajabiLogo = PIXI.Texture.from(require(`../images/ipad_logo.svg`), undefined, undefined, 1.0);
+    const mask = new PIXI.Sprite(kajabiLogo);
+    // mask.anchor.set(0.5);
+    mask.x = 300;
+    mask.y = 300;
 
     bg.mask = mask;
 
@@ -46,15 +46,15 @@ class TextZoom extends Component {
       target.y = Math.floor(Math.random() * 300);
     }
 
-    // app.ticker.add(() => {
-    //   mask.x += (target.x - mask.x) * 0.1;
-    //   mask.y += (target.y - mask.y) * 0.1;
-    //   mask.rotation += 0.2;
-
-    //   if (Math.abs(mask.x - target.x) < 1) {
-    //     reset();
-    //   }
-    // });
+    app.ticker.add(() => {
+      // mask.x += (target.x - mask.x) * 0.1;
+      // mask.y += (target.y - mask.y) * 0.1;
+      // mask.scale.x += 0.001;
+      // mask.scale.y += 0.001;
+      if (Math.abs(mask.x - target.x) < 1) {
+        reset();
+      }
+    });
   }
 
   render() {
