@@ -1,8 +1,5 @@
 import React, { Component } from "react";
-
 import $ from "jquery";
-
-import { ReactComponent as Logo } from "../images/ipad_logo.svg";
 
 class TextZoom extends Component {
 
@@ -14,7 +11,10 @@ class TextZoom extends Component {
     let obj = {};
     obj.canvas = document.querySelector("canvas");
     obj.ctx = obj.canvas.getContext("2d");
+    obj.isReady = false;
     obj.scale = 1;
+    obj.xOffset = 0;
+    obj.yOffset = 0;
     obj.pageMetrics = {
       windowWidth: $window.outerWidth(),
       windowHeight: $window.outerHeight()
@@ -30,13 +30,39 @@ class TextZoom extends Component {
     };
     console.log("obj:", obj);
 
-    function init() {
-      getSVG();
-      loadImage();
+    console.log("getSVG");
+    let svgEl = document.querySelector("svg");
+    let viewBox = svgEl.attributes.viewBox.value.split(" ").splice(2, 2).map(parseFloat);
+    svgEl.setAttribute("width", viewBox[0]);
+    svgEl.setAttribute("height", viewBox[1]);
+    obj.svg = svgEl;
+
+    console.log("loadImage");
+    let blob = new Blob([obj.svg.outerHTML], {type: 'image/svg+xml'});
+    let url = URL.createObjectURL(blob);
+    let img = new Image();
+    img.onload = function() {
+      console.log("kablammo");
+      obj.isReady = true;
+      obj.img = img;
+      obj.metrics.svgWidth = img.naturalWidth;
+      obj.metrics.svgHeight = img.naturalHeight;
+      onResizeImmediate();
+    }
+    img.src = url;
+
+    function onResizeImmediate() {
       setCanvasSize();
+      draw();
+      console.log("obj:", obj);
     }
 
-    init();
+    function draw() {
+      if (obj.isReady) {
+        drawBackgroundRect();
+        drawPath();
+      }
+    }
 
     function setCanvasSize() {
       obj.retinaScale = window.devicePixelRatio > 1 ? 2 : 1;
@@ -54,43 +80,19 @@ class TextZoom extends Component {
       console.log("drawBackgroundRect");
       obj.ctx.globalCompositeOperation = "source-over";
       obj.ctx.setTransform(1, 0, 0, 1, 0, 0);
-      obj.ctx.fillStyle = "rgba(255, 0, 0, 1.0)";
+      obj.ctx.fillStyle = "rgba(255, 255, 255, 1.0)";
       obj.ctx.fillRect(0, 0, obj.metrics.canvasWidth, obj.metrics.canvasHeight);
     }
 
     function drawPath() {
       console.log("drawPath");
       obj.ctx.globalCompositeOperation = "destination-out";
-      // let t = obj.scale * obj.metrics.retinaScale;
-      obj.ctx.setTransform(1, 0, 0, 1, 0, 0);
-      // obj.ctx.translate(-obj.metrics.svgWidth / 2 * t, -obj.metrics.svgHeight / 2 * t);
-      // obj.ctx.translate(obj.xOffset * obj.metrics.retinaScale, obj.yOffset * obj.metrics.retinaScale);
-      // obj.ctx.scale(t, t);
+      let scale = obj.scale * obj.metrics.retinaScale;
+      obj.ctx.setTransform(1, 0, 0, 1, 0.5 * obj.metrics.canvasWidth, 0.5 * obj.metrics.canvasHeight);
+      obj.ctx.translate(-obj.metrics.svgWidth / 2 * scale, -obj.metrics.svgHeight / 2 * scale);
+      obj.ctx.translate(obj.xOffset * obj.metrics.retinaScale, obj.yOffset * obj.metrics.retinaScale);
+      obj.ctx.scale(scale, scale);
       obj.ctx.drawImage(obj.img, 0, 0);
-    }
-
-    function loadImage() {
-      console.log("loadImage");
-      const blob = new Blob([obj.svg.outerHTML], {type: 'image/svg+xml'});
-      const url = URL.createObjectURL(blob);
-      var img = new Image();
-      img.onload = function() {
-        console.log("kablammo");
-        obj.ctx.drawImage(img, 0, 0);
-        obj.img = img;
-        drawBackgroundRect();
-        drawPath();
-      }
-      img.src = url;
-    }
-
-    function getSVG() {
-      console.log("getSVG");
-      let svgEl = document.querySelector("svg");
-      let viewBox = svgEl.attributes.viewBox.value.split(" ").splice(2, 2).map(parseFloat);
-      svgEl.setAttribute("width", viewBox[0]);
-      svgEl.setAttribute("height", viewBox[1]);
-      obj.svg = svgEl;
     }
   }
 
@@ -99,7 +101,7 @@ class TextZoom extends Component {
       <section className="zoom">
         <img src={ require(`../images/bg.jpg`) } className="zoom__bg" />
         <canvas id="canvie"></canvas>
-        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" className="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" className="logo">
           <g>
             <path d="M0,188.6c0-13.1,10.5-22.7,23.5-22.7s23.5,9.6,23.5,22.7c0,12.8-10.5,22.7-23.5,22.7S0,201.4,0,188.6z M1.5,229.1h43.9
               v161.2H1.5V229.1z"></path>
@@ -121,7 +123,6 @@ class TextZoom extends Component {
               c-52.2,0-85.4-24.8-86.8-65.6H829z"></path>
           </g>
         </svg>
-
       </section>
     );
   }
