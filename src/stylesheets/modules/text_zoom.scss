@@ -1,9 +1,7 @@
 .zoom {
   width: 100vw;
   height: 100vh;
-  &__positioner {
-    position: relative;
-    width: 100%;
-    height: 100%;
+  &__bg {
+    position: absolute;
   }
 }
