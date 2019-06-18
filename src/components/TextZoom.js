@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import $ from "jquery";
+import TweenMax from "gsap";
 
 class TextZoom extends Component {
 
@@ -43,10 +44,27 @@ class TextZoom extends Component {
     let img = new Image();
     img.onload = function() {
       console.log("kablammo");
+      let r = .75;
       obj.isReady = true;
       obj.img = img;
       obj.metrics.svgWidth = img.naturalWidth;
       obj.metrics.svgHeight = img.naturalHeight;
+      console.log("obj:", obj);
+
+      let svgFocus = document.querySelector("#focus");
+      let focusObj = {
+        x: parseFloat(svgFocus.getAttribute("x")),
+        y: parseFloat(svgFocus.getAttribute("y")),
+        width: parseFloat(svgFocus.getAttribute("width")),
+        height: parseFloat(svgFocus.getAttribute("height"))
+      };
+      console.log("focusObj:", focusObj);
+      let o = "(100vw * 0.6) / " + obj.metrics.svgWidth;
+      let a = "100vw / " + focusObj.width;
+      let l = obj.metrics.svgWidth / 2 - (focusObj.x + focusObj.width / 2);
+      let c = obj.metrics.svgHeight / 2 - (focusObj.y + focusObj.height / 2);
+      console.log("o:", o + "\na:", a + "\nl:", l + "\nc:", c + "\nr:", r);
+
       onResizeImmediate();
     }
     img.src = url;
@@ -54,14 +72,6 @@ class TextZoom extends Component {
     function onResizeImmediate() {
       setCanvasSize();
       draw();
-      console.log("obj:", obj);
-    }
-
-    function draw() {
-      if (obj.isReady) {
-        drawBackgroundRect();
-        drawPath();
-      }
     }
 
     function setCanvasSize() {
@@ -74,6 +84,14 @@ class TextZoom extends Component {
       obj.canvas.style.height = obj.metrics.height + "px";
       obj.canvas.width = obj.metrics.width * obj.retinaScale;
       obj.canvas.height = obj.metrics.height * obj.retinaScale;
+    }
+
+    function draw() {
+      if (obj.isReady) {
+        drawBackgroundRect();
+        drawPath();
+        animate();
+      }
     }
 
     function drawBackgroundRect() {
@@ -93,6 +111,11 @@ class TextZoom extends Component {
       obj.ctx.translate(obj.xOffset * obj.metrics.retinaScale, obj.yOffset * obj.metrics.retinaScale);
       obj.ctx.scale(scale, scale);
       obj.ctx.drawImage(obj.img, 0, 0);
+    }
+
+    function animate() {
+      console.log("animate");
+      TweenMax.to(obj.img, 1, { width: "*=2" });
     }
   }
 
@@ -121,6 +144,7 @@ class TextZoom extends Component {
               c-40-8.6-59.7-28.9-59.7-60.6c0-40,34.6-66.5,83-66.5c50.5,0,82.3,26,83,65.3h-42.6c-1.5-18.4-17.6-29.5-40.3-29.5
               c-22.4,0-37.5,10.7-37.5,26.8c0,13.4,10.5,20.9,35.5,26.6l26.3,5.6c43.5,9.3,62.4,28,62.4,61.1c0,42.1-34.1,68.7-88,68.7
               c-52.2,0-85.4-24.8-86.8-65.6H829z"></path>
+            <rect id="focus" x="505" y="290.7" fill="#FF0000" width="32" height="24.4"></rect>
           </g>
         </svg>
       </section>
