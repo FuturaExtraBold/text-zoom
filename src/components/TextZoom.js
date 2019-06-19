@@ -21,9 +21,19 @@ class TextZoom extends Component {
     let canvasHeight = 0;
 
     // Background
-    let bgImage = document.querySelector("img");
-    let bgWidth = bgImage.width;
-    let bgHeight = bgImage.height;
+    console.log("loading bgImage");
+    let bgImage = new Image();
+    let bgIsReady = false;
+    let bgScale = 1;
+    let bgWidth = 0;
+    let bgHeight = 0;
+    bgImage.onload = function() {
+      bgIsReady = true;
+      bgWidth = bgImage.naturalWidth;
+      bgHeight = bgImage.naturalHeight;
+      console.log("bgImage loaded! bgImage:", bgImage, "bgWidth:", bgWidth, "bgHeight:", bgHeight);
+    }
+    bgImage.src = require(`../images/bg.jpg`);
 
     // SVG
     let svgEl = document.querySelector("svg");
@@ -41,7 +51,7 @@ class TextZoom extends Component {
     let url = URL.createObjectURL(blob);
     let img = new Image();
     img.onload = function() {
-      // console.log("SVG image loaded");
+      console.log("SVG image loaded");
       svgIsReady = true;
       svgImage = img;
       svgWidth = img.naturalWidth;
@@ -63,31 +73,22 @@ class TextZoom extends Component {
     function draw() {
       if (svgIsReady) {
         setCanvasSize();
-        drawBackground();
-        drawBackgroundRect();
+        if (bgIsReady) drawBackground();
         drawPath();
       }
     }
 
     function drawBackground() {
-      // console.log("drawBackground");
-      // ctx.globalCompositeOperation = "source-over";
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      // console.log("drawBackground, bgScale:", bgScale);
+      ctx.setTransform(1, 0, 0, 1, 0.5 * canvasWidth, 0.5 * canvasHeight);
+      ctx.translate(-bgWidth / 2 * bgScale, -bgHeight / 2 * bgScale);
+      ctx.scale(bgScale, bgScale);
       ctx.drawImage(bgImage, 0, 0);
-      // $(".zoom__bg").css("display", "none");
-    }
-
-    function drawBackgroundRect() {
-      // console.log("drawBackgroundRect");
-      ctx.globalCompositeOperation = "source-over";
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.fillStyle = "rgba(255, 255, 255, 1.0)";
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     }
 
     function drawPath() {
       // console.log("drawPath");
-      ctx.globalCompositeOperation = "destination-out";
+      ctx.globalCompositeOperation = "destination-in";
       let scale = svgScale * retinaScale;
       ctx.setTransform(1, 0, 0, 1, 0.5 * canvasWidth, 0.5 * canvasHeight);
       ctx.translate(-svgWidth / 2 * scale, -svgHeight / 2 * scale);
@@ -99,9 +100,9 @@ class TextZoom extends Component {
     $window.on("mousemove", function(event) {
       // console.log("clientX:", event.clientX, "clientY:", event.clientY);
       let xScale = (event.clientX / windowWidth * 100) / 100;
-      // console.log("xScale:", xScale);
+      console.log("xScale:", xScale);
       svgScale = Math.max(1, xScale * 20);
-      // TweenMax.to($(".zoom__bg"), 0.1, { scale: Math.max(1, 2 - xScale) });
+      bgScale = Math.max(1, 2 - xScale);
       draw();
     });
   }
@@ -109,7 +110,7 @@ class TextZoom extends Component {
   render() {
     return (
       <Fragment>
-        <img src={ require(`../images/bg.jpg`) } className="bg-image" />
+        {/* <img src={ require(`../images/bg.jpg`) } id="bg-image" /> */}
         <section className="zoom">
           <canvas id="canvie"></canvas>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" className="logo">
