@@ -105,6 +105,12 @@ class TextZoom extends Component {
       bgScale = Math.max(1, 2 - xScale);
       draw();
     });
+
+    $window.on("resize", function(event) {
+      windowWidth = $window.outerWidth();
+      windowHeight = $window.outerHeight();
+      draw();
+    });
   }
 
   render() {
