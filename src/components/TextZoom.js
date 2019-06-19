@@ -8,63 +8,45 @@ class TextZoom extends Component {
 
     console.log("TextZoom componentDidMount");
 
+    // Document
+    let docWidth = 0;
+    let docHeight = 0;
+
+    // Window
     let $window = $(window);
-    let obj = {};
-    obj.canvas = document.querySelector("canvas");
-    obj.ctx = obj.canvas.getContext("2d");
-    obj.isReady = false;
-    obj.scale = 1;
-    obj.xOffset = 0;
-    obj.yOffset = 0;
-    obj.pageMetrics = {
-      windowWidth: $window.outerWidth(),
-      windowHeight: $window.outerHeight()
-    };
-    obj.metrics = {
-      width: 0,
-      height: 0,
-      retinaScale: window.devicePixelRatio,
-      canvasWidth: 0,
-      canvasHeight: 0,
-      svgWidth: 0,
-      svgHeight: 0
-    };
-    console.log("obj:", obj);
+    let windowWidth = $window.outerWidth();
+    let windowHeight = $window.outerHeight();
+    let retinaScale = window.devicePixelRatio;
+
+    // Canvas
+    let canvas = document.querySelector("canvas");
+    let ctx = canvas.getContext("2d");
+    let canvasWidth = 0;
+    let canvasHeight = 0;
+
+    // SVG
+    let svgEl = document.querySelector("svg");
+    let svgImage;
+    let svgIsReady = false;
+    let svgScale = 1;
+    let svgWidth = 0;
+    let svgHeight = 0;
 
     console.log("getSVG");
-    let svgEl = document.querySelector("svg");
     let viewBox = svgEl.attributes.viewBox.value.split(" ").splice(2, 2).map(parseFloat);
     svgEl.setAttribute("width", viewBox[0]);
     svgEl.setAttribute("height", viewBox[1]);
-    obj.svg = svgEl;
 
     console.log("loadImage");
-    let blob = new Blob([obj.svg.outerHTML], {type: 'image/svg+xml'});
+    let blob = new Blob([svgEl.outerHTML], {type: 'image/svg+xml'});
     let url = URL.createObjectURL(blob);
     let img = new Image();
     img.onload = function() {
       console.log("kablammo");
-      let r = .75;
-      obj.isReady = true;
-      obj.img = img;
-      obj.metrics.svgWidth = img.naturalWidth;
-      obj.metrics.svgHeight = img.naturalHeight;
-      console.log("obj:", obj);
-
-      let svgFocus = document.querySelector("#focus");
-      let focusObj = {
-        x: parseFloat(svgFocus.getAttribute("x")),
-        y: parseFloat(svgFocus.getAttribute("y")),
-        width: parseFloat(svgFocus.getAttribute("width")),
-        height: parseFloat(svgFocus.getAttribute("height"))
-      };
-      console.log("focusObj:", focusObj);
-      let o = "(100vw * 0.6) / " + obj.metrics.svgWidth;
-      let a = "100vw / " + focusObj.width;
-      let l = obj.metrics.svgWidth / 2 - (focusObj.x + focusObj.width / 2);
-      let c = obj.metrics.svgHeight / 2 - (focusObj.y + focusObj.height / 2);
-      console.log("o:", o + "\na:", a + "\nl:", l + "\nc:", c + "\nr:", r);
-
+      svgIsReady = true;
+      svgImage = img;
+      svgWidth = img.naturalWidth;
+      svgHeight = img.naturalHeight;
       onResizeImmediate();
     }
     img.src = url;
@@ -75,19 +57,19 @@ class TextZoom extends Component {
     }
 
     function setCanvasSize() {
-      obj.retinaScale = window.devicePixelRatio > 1 ? 2 : 1;
-      obj.metrics.width = obj.pageMetrics.windowWidth;
-      obj.metrics.height = obj.pageMetrics.windowHeight;
-      obj.metrics.canvasWidth = obj.metrics.width * obj.retinaScale;
-      obj.metrics.canvasHeight = obj.metrics.height * obj.retinaScale;
-      obj.canvas.style.width = obj.metrics.width + "px";
-      obj.canvas.style.height = obj.metrics.height + "px";
-      obj.canvas.width = obj.metrics.width * obj.retinaScale;
-      obj.canvas.height = obj.metrics.height * obj.retinaScale;
+      retinaScale = window.devicePixelRatio > 1 ? 2 : 1;
+      docWidth = windowWidth;
+      docHeight = windowHeight;
+      canvasWidth = docWidth * retinaScale;
+      canvasHeight = docHeight * retinaScale;
+      canvas.style.width = docWidth + "px";
+      canvas.style.height = docHeight + "px";
+      canvas.width = docWidth * retinaScale;
+      canvas.height = docHeight * retinaScale;
     }
 
     function draw() {
-      if (obj.isReady) {
+      if (svgIsReady) {
         setCanvasSize();
         drawBackgroundRect();
         drawPath();
@@ -96,28 +78,28 @@ class TextZoom extends Component {
 
     function drawBackgroundRect() {
       console.log("drawBackgroundRect");
-      obj.ctx.globalCompositeOperation = "source-over";
-      obj.ctx.setTransform(1, 0, 0, 1, 0, 0);
-      obj.ctx.fillStyle = "rgba(255, 255, 255, 1.0)";
-      obj.ctx.fillRect(0, 0, obj.metrics.canvasWidth, obj.metrics.canvasHeight);
+      ctx.globalCompositeOperation = "source-over";
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = "rgba(255, 255, 255, 1.0)";
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     }
 
     function drawPath() {
       console.log("drawPath");
-      obj.ctx.globalCompositeOperation = "destination-out";
-      let scale = obj.scale * obj.metrics.retinaScale;
-      obj.ctx.setTransform(1, 0, 0, 1, 0.5 * obj.metrics.canvasWidth, 0.5 * obj.metrics.canvasHeight);
-      obj.ctx.translate(-obj.metrics.svgWidth / 2 * scale, -obj.metrics.svgHeight / 2 * scale);
-      obj.ctx.translate(obj.xOffset * obj.metrics.retinaScale, obj.yOffset * obj.metrics.retinaScale);
-      obj.ctx.scale(scale, scale);
-      obj.ctx.drawImage(obj.img, 0, 0);
+      ctx.globalCompositeOperation = "destination-out";
+      let scale = svgScale * retinaScale;
+      ctx.setTransform(1, 0, 0, 1, 0.5 * canvasWidth, 0.5 * canvasHeight);
+      ctx.translate(-svgWidth / 2 * scale, -svgHeight / 2 * scale);
+      ctx.translate(retinaScale, retinaScale);
+      ctx.scale(scale, scale);
+      ctx.drawImage(svgImage, 0, 0);
     }
 
     $window.on("mousemove", function(event) {
       // console.log("clientX:", event.clientX, "clientY:", event.clientY);
-      let xScale = (event.clientX / obj.pageMetrics.windowWidth * 100) / 100;
+      let xScale = (event.clientX / windowWidth * 100) / 100;
       console.log("xScale:", xScale);
-      obj.scale = Math.max(1, xScale * 20);
+      svgScale = Math.max(1, xScale * 20);
       TweenMax.to($(".zoom__bg"), 0.1, { scale: Math.max(1, 2 - xScale) });
       draw();
     });
