@@ -33,7 +33,7 @@ class TextZoom extends Component {
       bgHeight = bgImage.naturalHeight;
       console.log("bgImage loaded! bgImage:", bgImage, "bgWidth:", bgWidth, "bgHeight:", bgHeight);
     }
-    bgImage.src = require(`../images/bg.jpg`);
+    bgImage.src = require(`../images/bg3.jpg`);
 
     // SVG
     let svgEl = document.querySelector("svg");
@@ -79,10 +79,11 @@ class TextZoom extends Component {
     }
 
     function drawBackground() {
-      // console.log("drawBackground, bgScale:", bgScale);
+      // console.log("drawBackground");
+      let scale = bgScale * retinaScale;
       ctx.setTransform(1, 0, 0, 1, 0.5 * canvasWidth, 0.5 * canvasHeight);
-      ctx.translate(-bgWidth / 2 * bgScale, -bgHeight / 2 * bgScale);
-      ctx.scale(bgScale, bgScale);
+      ctx.translate(-bgWidth / 2 * scale, -bgHeight / 2 * scale);
+      ctx.scale(scale, scale);
       ctx.drawImage(bgImage, 0, 0);
     }
 
