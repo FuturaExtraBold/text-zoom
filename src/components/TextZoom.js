@@ -88,9 +88,9 @@ class TextZoom extends Component {
 
     function draw() {
       if (obj.isReady) {
+        setCanvasSize();
         drawBackgroundRect();
         drawPath();
-        animate();
       }
     }
 
@@ -113,10 +113,14 @@ class TextZoom extends Component {
       obj.ctx.drawImage(obj.img, 0, 0);
     }
 
-    function animate() {
-      console.log("animate");
-      TweenMax.to(obj.img, 1, { width: "*=2" });
-    }
+    $window.on("mousemove", function(event) {
+      // console.log("clientX:", event.clientX, "clientY:", event.clientY);
+      let xScale = (event.clientX / obj.pageMetrics.windowWidth * 100) / 100;
+      console.log("xScale:", xScale);
+      obj.scale = Math.max(1, xScale * 20);
+      TweenMax.to($(".zoom__bg"), 0.1, { scale: Math.max(1, 2 - xScale) });
+      draw();
+    });
   }
 
   render() {
